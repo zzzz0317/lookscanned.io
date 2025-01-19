@@ -31,6 +31,8 @@ jobs:
     
     - name: Create release timestamp
       id: timestamp
+      env:
+        TZ: 'Asia/Shanghai'
       run: echo "timestamp=$(date +'%Y%m%d_%H%M%S')" >> $GITHUB_OUTPUT
       
     - name: Create zip archive
