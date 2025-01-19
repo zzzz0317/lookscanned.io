@@ -17,7 +17,6 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: '22'
-        # cache: 'npm'
         
     - name: Install dependencies
       run: |
@@ -29,12 +28,26 @@ jobs:
       
     - name: Build project
       run: npm run build
+    
+    - name: Create release timestamp
+      id: timestamp
+      run: echo "timestamp=$(date +'%Y%m%d_%H%M%S')" >> $GITHUB_OUTPUT
+      
+    - name: Create zip archive
+      run: cd dist && zip -r ../lockscanned_dist_${{ steps.timestamp.outputs.timestamp }}.zip .
+      
+    - name: Create tar.gz archive
+      run: |
+        mv dist lockscanned_dist_${{ steps.timestamp.outputs.timestamp }}
+        tar czvf lockscanned_dist_${{ steps.timestamp.outputs.timestamp }}.tar.gz lockscanned_dist_${{ steps.timestamp.outputs.timestamp }}
       
     - name: Create Release
       uses: softprops/action-gh-release@v2
       with:
         tag_name: ${{ github.ref_name }}-${{ github.sha }}-${{ github.run_id }}
         files: |
-          dist/**/*
+          lockscanned_dist_${{ steps.timestamp.outputs.timestamp }}.zip
+          lockscanned_dist_${{ steps.timestamp.outputs.timestamp }}.tar.gz
+          
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
